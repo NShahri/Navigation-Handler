@@ -1,15 +1,19 @@
-/* global require process*/
+/* global require*/
 
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
-//import replace from 'rollup-plugin-replace';
 
 let pkg = require('./package.json');
 
 export default {
     entry: 'src/index.js',
-    external:  Object.keys(pkg.dependencies || {}),
+    external: Object.keys(pkg.dependencies || {}),
+    globals: {
+        'react-router-dom': 'ReactRouterDOM',
+        'react': 'React',
+        'prop-types': 'PropTypes'
+    },
     plugins: [
         babel({
             babelrc: false,
@@ -25,13 +29,7 @@ export default {
                 'external-helpers'
             ]
         }),
-        commonjs({
-            // namedExports: {
-            //     'node_modules/react/react.js': ['PropTypes', 'createElement']
-            // },
-            // exclude: ['node_modules/moment/**']
-        }),
-        //replace({ 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) }),
+        commonjs(),
         nodeResolve({
             module: true,
             jsnext: true,
@@ -48,8 +46,8 @@ export default {
         },
         {
             dest: pkg['main'],
-            format: 'cjs',
-            moduleName: pkg.name,
+            format: 'umd',
+            moduleName: 'RouterHandler',
             sourceMap: true
         }
     ]

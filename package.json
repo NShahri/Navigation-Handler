@@ -1,6 +1,6 @@
 {
   "name": "react-router-handler",
-  "main": "dist/react-router-handler.cjs.js",
+  "main": "dist/react-router-handler.umd.js",
   "module": "dist/react-router-handler.es.js",
   "version": "0.0.0",
   "description": "",
@@ -13,9 +13,10 @@
     "build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
     "prebuild": "npm-run-all lint flow test",
     "watch": "cross-env NODE_ENV=production rollup -w -c rollup.config.js",
-    "start": "npm run watch",
+    "start": "npm-run-all --parallel watch browse",
     "flow": "flow",
-    "lint": "eslint src/**/*.{js,jsx}"
+    "lint": "eslint src/**/*.{js,jsx}",
+    "browse": "browser-sync start --server --directory --files 'dist/*' --no-notify --cors"
   },
   "license": "MIT",
   "devDependencies": {
@@ -26,6 +27,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "babel-standalone": "^6.24.0",
+    "browser-sync": "^2.18.8",
     "chai": "^3.5.0",
     "cross-env": "^4.0.0",
     "eslint": "^3.19.0",
@@ -42,7 +44,9 @@
     "rollup-watch": "^3.2.2"
   },
   "dependencies": {
+    "prop-types": "^15.5.8",
     "react": "^15.5.4",
-    "react-router": "^4.1.0"
+    "react-router": "^4.1.0",
+    "react-router-dom": "^4.1.1"
   }
 }

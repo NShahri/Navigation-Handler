@@ -1,10 +1,29 @@
 import React from 'react';
-import { Prompt } from 'react-router-dom';
+import { Prompt, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 class RouterHandler extends React.Component {
     static defaultProps = {
         when: false
+    }
+
+    static propTypes = {
+        children: PropTypes.node,
+        when: PropTypes.bool.isRequired,
+    }
+
+    static contextTypes = {
+        routerHandler: PropTypes.object
+    }
+
+    static childContextTypes = {
+        routerHandler: PropTypes.object.isRequired
+    }
+
+    getChildContext() {
+        return {
+            routerHandler: this.context.routerHandler || this
+        };
     }
 
     constructor(props){
@@ -15,37 +34,38 @@ class RouterHandler extends React.Component {
         this._onRouteChanging = this._onRouteChanging.bind(this);
     }
 
-    renderMatchRoute(child, nextPathname){
-        console.log(child.path, nextPathname);
-
-        if(!child.path) {
-            return null;
-        }
-
-        return child.path === nextPathname ? React.cloneElement(child, { navigate: ()=>{alert('sdfsdf');} }) : null;
-    }
-
     render(){
-        let {children, when} = this.props;
+        let {when} = this.props;
+        let {activeChild} = this.state;
 
         return (
             <div>
                 <Prompt when={when} message={this._onRouteChanging} />
-                { React.Children.map(children, (c, index) => this.renderMatchRoute(c, this.state.nextPathname, index)) }
+                { activeChild }
             </div>
         );
     }
 
     _onRouteChanging(p){
-        this.setState({nextPathname: p.pathname});
+        let {children, when} = this.props;
+        let childArray = React.Children.toArray(children);
+        let activeChild = childArray.find(c => !c.to || c.to === p.pathname );
+        when = when && !!activeChild;
+
+        if(!when){
+            this.setState({to: p.pathname, activeChild: null});
+            return true;
+        }
+
+        this.setState({to: p.pathname, activeChild:  React.cloneElement(activeChild, { navigate: ()=>alert(p.pathname) }) });
 
         return false;
     }
 }
 
-RouterHandler.propTypes = {
-    children: PropTypes.node,
-    when: PropTypes.bool.isRequired,
-};
+// RouterHandler.propTypes = {
+//     children: PropTypes.node,
+//     when: PropTypes.bool.isRequired,
+// };
 
-export default RouterHandler;
+export default withRouter(RouterHandler);

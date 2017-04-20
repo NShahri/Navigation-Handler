@@ -18,8 +18,8 @@
                     <div>
                         Home
                         <RouterHandler when={true}>
-                            <div path="/home">
-                                Nima
+                            <div to="/home" >
+                                <button onClick={()=>this.navigate()}>Nav</button>
                             </div>
                         </RouterHandler>
                     </div>

@@ -1,71 +1,86 @@
 import React from 'react';
-import { Prompt, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router-dom';
 
-class RouterHandler extends React.Component {
-    static defaultProps = {
-        when: false
-    }
+class HandlerAction extends React.Component {
+    constructor(...args){
+        super(...args);
 
-    static propTypes = {
-        children: PropTypes.node,
-        when: PropTypes.bool.isRequired,
-    }
-
-    static contextTypes = {
-        routerHandler: PropTypes.object
-    }
-
-    static childContextTypes = {
-        routerHandler: PropTypes.object.isRequired
-    }
-
-    getChildContext() {
-        return {
-            routerHandler: this.context.routerHandler || this
+        this.state = {
+            active: false
         };
+
+        this._onRouteChange = this._onRouteChange.bind(this);
     }
 
-    constructor(props){
-        super(props);
-
-        this.state = {};
-
-        this._onRouteChanging = this._onRouteChanging.bind(this);
-    }
-
-    render(){
-        let {when} = this.props;
-        let {activeChild} = this.state;
-
-        return (
-            <div>
-                <Prompt when={when} message={this._onRouteChanging} />
-                { activeChild }
-            </div>
-        );
-    }
-
-    _onRouteChanging(p){
-        let {children, when} = this.props;
-        let childArray = React.Children.toArray(children);
-        let activeChild = childArray.find(c => !c.to || c.to === p.pathname );
-        when = when && !!activeChild;
-
-        if(!when){
-            this.setState({to: p.pathname, activeChild: null});
-            return true;
+    _onRouteChange(p){
+        if(p.pathname === this.props.path){
+            this.setState({active: true});
+            return false;
         }
 
-        this.setState({to: p.pathname, activeChild:  React.cloneElement(activeChild, { navigate: ()=>alert(p.pathname) }) });
+        this.setState({active: false});
+        return true;
+    }
 
-        return false;
+    enable() {
+        if (this.unblock){
+            this.unblock();
+        }
+
+        this.unblock = this.props.history.block(this._onRouteChange);
+    }
+
+    disable() {
+        if (this.unblock) {
+            this.unblock();
+            this.unblock = null;
+        }
+    }
+
+    componentWillMount() {
+        if (this.props.when){
+            this.enable();
+        }
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.when) {
+            if (!this.props.when){
+                this.enable();
+            }
+        } else {
+            this.disable();
+        }
+    }
+
+    componentWillUnmount() {
+        this.disable();
+    }
+
+    render() {
+        let {children} = this.props;
+        let {active} = this.state;
+
+        if(!active){
+            return null;
+        }
+
+        return React.Children.only(children);
     }
 }
 
-// RouterHandler.propTypes = {
-//     children: PropTypes.node,
-//     when: PropTypes.bool.isRequired,
-// };
+HandlerAction.propTypes = {
+    path: PropTypes.string.isRequired,
+    when: PropTypes.bool.isRequired,
+    children: PropTypes.node,
+    history: PropTypes.object.isRequired,
+    path: PropTypes.string.isRequired
+};
 
-export default withRouter(RouterHandler);
+HandlerAction.defaultProps = {
+    when: true,
+    path: ''
+};
+
+export default withRouter(HandlerAction);

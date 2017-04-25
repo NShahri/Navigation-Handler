@@ -17,10 +17,11 @@
                 return (
                     <div>
                         Home
-                        <RouterHandler when={true}>
-                            <div to="/home" >
-                                <button onClick={()=>this.navigate()}>Nav</button>
-                            </div>
+                        <RouterHandler when={true} path="/samples/about">
+                            <button onClick={()=>this.navigate()}>Nav</button>
+                        </RouterHandler>
+                        <RouterHandler when={true} path="/samples/about">
+                            <button onClick={()=>this.navigate()}>Nav2</button>
                         </RouterHandler>
                     </div>
                 );
